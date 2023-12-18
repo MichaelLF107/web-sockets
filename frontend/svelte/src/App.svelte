@@ -1,47 +1,98 @@
 <script lang="ts">
-  import svelteLogo from './assets/svelte.svg'
-  import viteLogo from '/vite.svg'
-  import Counter from './lib/Counter.svelte'
+  import { onMount } from "svelte";
+  import Navbar from "./lib/Navbar.svelte";
+  import Chat from "./lib/Chat.svelte";
+
+  import type { Message } from "./types/message";
+
+  let ws: WebSocket;
+  let messages: Message[] = [];
+  let rooms: string[] = [];
+  let currentRoom: string;
+  let selectedUser = false;
+  let user: string;
+
+  onMount(() => {
+    ws = new WebSocket("ws://localhost:8080");
+    ws.onmessage = (message) => {
+      const data = JSON.parse(message.data);
+      console.log("received message", data);
+      if (data.action === "listed") {
+        rooms = data.chatrooms;
+      } else if (data.action === "message") {
+        let newMessages = [...messages];
+        newMessages.unshift(data.content);
+        newMessages = newMessages.filter((value, index, self) => {
+          return self.indexOf(value) === index;
+        });
+        messages = newMessages;
+      }
+    };
+  });
+
+  function listRooms() {
+    ws.send(JSON.stringify({ action: "list" }));
+  }
+
+  function createRoom() {
+    ws.send(JSON.stringify({ action: "create" }));
+  }
+
+  function joinRoom(room: string) {
+    currentRoom = room;
+    ws.send(JSON.stringify({ action: "join", chatroomId: room }));
+    messages = [];
+  }
+
+  function sendMessage(message: string, user: string) {
+    ws.send(JSON.stringify({
+      action: 'message',
+      chatroomId: currentRoom,
+      content: {
+        user,
+        message,
+      }
+    }));
+  }
 </script>
 
 <main>
-  <div>
-    <a href="https://vitejs.dev" target="_blank" rel="noreferrer">
-      <img src={viteLogo} class="logo" alt="Vite Logo" />
-    </a>
-    <a href="https://svelte.dev" target="_blank" rel="noreferrer">
-      <img src={svelteLogo} class="logo svelte" alt="Svelte Logo" />
-    </a>
-  </div>
-  <h1>Vite + Svelte</h1>
-
-  <div class="card">
-    <Counter />
-  </div>
-
-  <p>
-    Check out <a href="https://github.com/sveltejs/kit#readme" target="_blank" rel="noreferrer">SvelteKit</a>, the official Svelte app framework powered by Vite!
-  </p>
-
-  <p class="read-the-docs">
-    Click on the Vite and Svelte logos to learn more
-  </p>
+  <Navbar {rooms} {listRooms} {createRoom} {joinRoom} />
+  {#if !currentRoom}
+    <span>Choose a room</span>
+  {:else if !selectedUser}
+    <div class="user-modal">
+      <input
+        type="text"
+        placeholder="Enter your name"
+        bind:value={user}
+      />
+      <button on:click={() => selectedUser = true}>Join Chat</button>
+    </div>
+  {:else}
+    <Chat {messages} {sendMessage} {user} />
+  {/if}
 </main>
 
 <style>
-  .logo {
-    height: 6em;
-    padding: 1.5em;
-    will-change: filter;
-    transition: filter 300ms;
+  main {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+    width: 100%;
   }
-  .logo:hover {
-    filter: drop-shadow(0 0 2em #646cffaa);
-  }
-  .logo.svelte:hover {
-    filter: drop-shadow(0 0 2em #ff3e00aa);
-  }
-  .read-the-docs {
-    color: #888;
+
+  .user-modal {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    gap: 1em;
+    padding: 1rem;
+    border: 1px solid #ff3e00aa;
+    border-radius: 0.5em;
+    background-color: #2b2b2b;
   }
 </style>

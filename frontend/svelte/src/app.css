@@ -26,8 +26,9 @@ body {
   margin: 0;
   display: flex;
   place-items: center;
-  min-width: 320px;
+  min-width: 100vw;
   min-height: 100vh;
+  overflow-y: hidden;
 }
 
 h1 {
@@ -40,7 +41,6 @@ h1 {
 }
 
 #app {
-  max-width: 1280px;
   margin: 0 auto;
   padding: 2rem;
   text-align: center;
@@ -55,14 +55,19 @@ button {
   font-family: inherit;
   background-color: #1a1a1a;
   cursor: pointer;
-  transition: border-color 0.25s;
+  transition: all 0.3s;
+  margin: 0 1em;
 }
 button:hover {
-  border-color: #646cff;
+  border-color: #ff3e00aa;
 }
 button:focus,
 button:focus-visible {
   outline: 4px auto -webkit-focus-ring-color;
+}
+
+input {
+  padding: 0.7em 1.4em;
 }
 
 @media (prefers-color-scheme: light) {
