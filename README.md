@@ -1,6 +1,6 @@
 ## Web Sockets
 
-This repository contains projects for a simple Chat application, built with React and Svelte on the frontend, Typescript and Python on the backend
+This repository contains projects for a simple Chat application, built with React, Vue and Svelte on the frontend, Typescript and Python on the backend
 
 ## Requirements
 
