@@ -1,0 +1,6 @@
+frontend/react/node_modules
+frontend/react/bun.lockb
+frontend/vue/node_modules
+frontend/vue/bun.lockb
+frontend/svelte/node_modules
+frontend/svelte/bun.lockb
